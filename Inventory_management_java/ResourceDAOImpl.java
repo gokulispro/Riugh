@@ -1,0 +1,212 @@
+package com.curonex.dao.impl;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.curonex.Resources;
+import com.curonex.dao.ResourceDAO;
+import com.curonex.enums.ResourceAvailabilityEnum;
+import com.curonex.enums.ResourceCategoryEnum;
+import com.curonex.exception.ResourceDAOException;
+
+public class ResourceDAOImpl implements ResourceDAO {
+
+    private final Map<Long, Resources> resourceDatabase;
+
+    public ResourceDAOImpl() {
+        resourceDatabase = new HashMap<>();
+    }
+
+    @Override
+    public Resources addResource(Resources resource)
+            throws ResourceDAOException {
+
+        try {
+            if (resource == null) {
+                throw new ResourceDAOException(
+                        "Resource cannot be null");
+            }
+
+            if (resourceDatabase.containsKey(
+                    resource.getResource_id())) {
+
+                throw new ResourceDAOException(
+                        "Resource ID already exists: "
+                        + resource.getResource_id());
+            }
+
+            resourceDatabase.put(
+                    resource.getResource_id(),
+                    resource);
+
+            return resource;
+
+        } catch (ResourceDAOException e) {
+            throw e;
+
+        } catch (Exception e) {
+            throw new ResourceDAOException(
+                    "Unable to add resource", e);
+        }
+    }
+
+    @Override
+    public Resources getResourceById(long resourceId)
+            throws ResourceDAOException {
+
+        try {
+            Resources resource =
+                    resourceDatabase.get(resourceId);
+
+            if (resource == null) {
+                throw new ResourceDAOException(
+                        "Resource not found with ID: "
+                        + resourceId);
+            }
+
+            return resource;
+
+        } catch (ResourceDAOException e) {
+            throw e;
+
+        } catch (Exception e) {
+            throw new ResourceDAOException(
+                    "Unable to access resource", e);
+        }
+    }
+
+
+    @Override
+    public List<Resources> getAllResources()
+            throws ResourceDAOException {
+
+        try {
+            return new ArrayList<>(
+                    resourceDatabase.values());
+
+        } catch (Exception e) {
+            throw new ResourceDAOException(
+                    "Unable to retrieve resources", e);
+        }
+    }
+
+    @Override
+    public Resources updateResource(Resources resource)
+            throws ResourceDAOException {
+
+        try {
+            if (resource == null) {
+                throw new ResourceDAOException(
+                        "Resource cannot be null");
+            }
+
+            long resourceId = resource.getResource_id();
+
+            if (!resourceDatabase.containsKey(resourceId)) {
+                throw new ResourceDAOException(
+                        "Resource not found with ID: "
+                        + resourceId);
+            }
+
+            resourceDatabase.put(resourceId, resource);
+
+            return resource;
+
+        } catch (ResourceDAOException e) {
+            throw e;
+
+        } catch (Exception e) {
+            throw new ResourceDAOException(
+                    "Unable to update resource", e);
+        }
+    }
+
+    @Override
+    public boolean deleteResource(long resourceId)
+            throws ResourceDAOException {
+
+        try {
+            Resources removedResource =
+                    resourceDatabase.remove(resourceId);
+
+            if (removedResource == null) {
+                throw new ResourceDAOException(
+                        "Resource not found with ID: "
+                        + resourceId);
+            }
+
+            return true;
+
+        } catch (ResourceDAOException e) {
+            throw e;
+
+        } catch (Exception e) {
+            throw new ResourceDAOException(
+                    "Unable to delete resource", e);
+        }
+    }
+
+    @Override
+    public List<Resources> getResourcesByHospital(
+            long hospitalId)
+            throws ResourceDAOException {
+
+        try {
+            return resourceDatabase
+                    .values()
+                    .stream()
+                    .filter(resource ->
+                            resource.getHospital_id()
+                                    == hospitalId)
+                    .toList();
+
+        } catch (Exception e) {
+            throw new ResourceDAOException(
+                    "Unable to retrieve hospital resources",
+                    e);
+        }
+    }
+
+    @Override
+    public List<Resources> getResourcesByCategory(
+            ResourceCategoryEnum category)
+            throws ResourceDAOException {
+
+        try {
+            return resourceDatabase
+                    .values()
+                    .stream()
+                    .filter(resource ->
+                            resource.getCategory() == category)
+                    .toList();
+
+        } catch (Exception e) {
+            throw new ResourceDAOException(
+                    "Unable to filter resources by category",
+                    e);
+        }
+    }
+
+    @Override
+    public List<Resources> getResourcesByAvailability(
+            ResourceAvailabilityEnum status)
+            throws ResourceDAOException {
+
+        try {
+            return resourceDatabase
+                    .values()
+                    .stream()
+                    .filter(resource ->
+                            resource.getAvailability_status()
+                                    == status)
+                    .toList();
+
+        } catch (Exception e) {
+            throw new ResourceDAOException(
+                    "Unable to filter resources by status",
+                    e);
+        }
+    }
+}
